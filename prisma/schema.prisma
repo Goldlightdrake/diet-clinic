@@ -1,0 +1,80 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Patient {
+  id             Int       @id @default(autoincrement())
+  fullName       String
+  email          String    @unique
+  weight         Int
+  dietican       Dietician @relation(fields: [dieticanId], references: [id])
+  dieticanId     Int
+  trainingLength Int
+  plan           Plan      @relation(fields: [planId], references: [id])
+  planId         Int
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  isActive       Boolean   @default(true)
+
+  @@index([planId])
+  @@index([dieticanId])
+}
+
+model Dietician {
+  id       Int       @id @default(autoincrement())
+  fullName String
+  email    String
+  hireDate DateTime
+  patients Patient[]
+}
+
+model Meal {
+  id          Int    @id @default(autoincrement())
+  name        String @unique
+  ingredients Int
+  recipe      String @db.LongText
+  totalKcal   Int
+  carbs       Int
+  fat         Int
+  protein     Int
+  plans       Plan[]
+}
+
+model Exercise {
+  id           Int        @id @default(autoincrement())
+  name         String     @unique
+  description  String     @db.LongText
+  technicalTip String?    @db.TinyText
+  kcal         Int
+  duration     Int?
+  repetitions  Int?
+  trainings    Training[]
+}
+
+model Training {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String     @db.LongText
+  exercises   Exercise[]
+  plan        Plan[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Plan {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String     @db.LongText
+  meals       Meal[]
+  trainings   Training[]
+  Patient     Patient[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
